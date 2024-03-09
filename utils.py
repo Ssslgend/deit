@@ -214,6 +214,13 @@ def save_on_master(*args, **kwargs):
 
 
 def init_distributed_mode(args):
+    """
+    Initialize distributed training variables
+    RANK：当前进程的等级（标识）。
+    WORLD_SIZE：总共有多少个训练进程。
+    LOCAL_RANK：当前机器上的GPU编号。
+    SLURM_PROCID：在使用SLURM作业调度系统时，当前任务的进程ID。
+    """
     if 'RANK' in os.environ and 'WORLD_SIZE' in os.environ:
         args.rank = int(os.environ["RANK"])
         args.world_size = int(os.environ['WORLD_SIZE'])
@@ -225,14 +232,18 @@ def init_distributed_mode(args):
         print('Not using distributed mode')
         args.distributed = False
         return
+    #使用分布式训练标志；
 
     args.distributed = True
-
+    #确保在多GPU训练时，每个进程都使用不同的GPU
     torch.cuda.set_device(args.gpu)
+    #初始化进程组
     args.dist_backend = 'nccl'
     print('| distributed init (rank {}): {}'.format(
         args.rank, args.dist_url), flush=True)
     torch.distributed.init_process_group(backend=args.dist_backend, init_method=args.dist_url,
                                          world_size=args.world_size, rank=args.rank)
+    #设置默认的随机种子
     torch.distributed.barrier()
+    #确保主进程执行特定的工作；
     setup_for_distributed(args.rank == 0)

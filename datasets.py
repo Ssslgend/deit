@@ -1,8 +1,6 @@
-# Copyright (c) 2015-present, Facebook, Inc.
-# All rights reserved.
 import os
 import json
-
+from pathlib import Path
 from torchvision import datasets, transforms
 from torchvision.datasets.folder import ImageFolder, default_loader
 
@@ -60,7 +58,13 @@ def build_dataset(is_train, args):
         dataset = datasets.CIFAR100(args.data_path, train=is_train, transform=transform)
         nb_classes = 100
     elif args.data_set == 'IMNET':
-        root = os.path.join(args.data_path, 'train' if is_train else 'val')
+        root = os.path.join(args.data_path, 'train.X1' if is_train else 'val.X')
+        fold_Path = Path(root)
+        # print(os.path.exists(fold_Path))
+        # print(root)
+        if not fold_Path.exists():
+            fold_Path.mkdir(parents=True)
+            print(f"The fold {fold_Path} has been created")
         dataset = datasets.ImageFolder(root, transform=transform)
         nb_classes = 1000
     elif args.data_set == 'INAT':

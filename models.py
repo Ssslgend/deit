@@ -3,7 +3,9 @@
 import torch
 import torch.nn as nn
 from functools import partial
+import timm
 
+assert timm.__version__ =='0.3.2'
 from timm.models.vision_transformer import VisionTransformer, _cfg
 from timm.models.registry import register_model
 from timm.models.layers import trunc_normal_
